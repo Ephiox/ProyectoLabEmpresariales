@@ -26,3 +26,11 @@ def log_request(req: 'flask_request', res: str) -> None:
         print(req.form, req.remote_addr, req.user_agent,
               str(datetime.today()),
               res, file=log, sep='|')
+
+
+def readlog_db():
+    conn = sqlite3.connect('bd.sqlite')
+    cursor = conn.cursor()
+    cursor.execute("""SELECT * FROM search_log""")
+    res = cursor.fetchall()
+    return res

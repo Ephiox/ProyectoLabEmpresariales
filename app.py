@@ -1,14 +1,8 @@
 from flask import Flask, render_template, request, redirect,escape
 from markupsafe import escape
-from search4web import search4letters,log_request
+from search4web import search4letters, log_request, readlog_db
 
 app = Flask(__name__)
-
-
-#@app.route("/")
-#def hello() -> '302':
-#    return redirect('/entry')
-
 
 @app.route("/search", methods=['POST'])
 def search():
@@ -37,6 +31,5 @@ def results_page():
 
 @app.route('/viewlog')
 def view_the_log() -> str:
-    with open('vsearch.log','r') as log:
-        contents = log.read()
+    contents = readlog_db()
     return escape(contents)
