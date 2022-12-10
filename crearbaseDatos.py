@@ -4,7 +4,7 @@ conn = sqlite3.connect('bd.sqlite')
 cursor = conn.cursor()
 
 cursor.execute("""CREATE TABLE search_log (
-                id int auto_increment primary key,
+                id INTEGER auto_increment primary key unique not null,
                 ts timestamp default current_timestamp,
                 phrase varchar(128) not null,
                 letters varchar(32) not null,
