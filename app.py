@@ -15,6 +15,18 @@ def entry_page() -> 'html':
     return render_template('entry.html',
                            the_title='Welcome to search for letters on the web!')
 
+@app.route("/")
+@app.route("/index")
+def index_page() -> 'html':
+    return render_template('index.html',
+                           the_title='Welcome to search for letters on the web!')
+
+@app.route("/")
+@app.route("/loggin")
+def index_page() -> 'html':
+    checkear
+    return render_template('index.html',
+                           the_title='Welcome to search for letters on the web!')
 
 @app.route("/result", methods=['POST'])
 def results_page():
