@@ -28,11 +28,18 @@ def readlog_bd():
 def register_bd(req: 'flask_request'):
     conn = sqlite3.connect('bd.sqlite')
     cursor = conn.cursor()
-    cursor.execute("""INSERT INTO users (name, password, dob, count)
-                VALUES (?, ?, ?, ?)""",
-                   (req.form['usuario'], hashlib.md5(req.form['password'].encode()).hexdigest(),
-                    str(datetime.today()), 0))
-    conn.commit()
+    resultado = True
+    cursor.execute("""SELECT name FROM users Where name=(?)""", (req.form['usuario'],))
+    res = cursor.fetchall()
+    if res == [] and req.form['usuario'] != '':
+        cursor.execute("""INSERT INTO users (name, password, dob, count)
+                       VALUES (?, ?, ?, ?)""",
+                       (req.form['usuario'], hashlib.md5(req.form['password'].encode()).hexdigest(),
+                        str(datetime.today()), 0))
+        conn.commit()
+    else:
+        resultado = False
+    return resultado
 
 
 def login_bd(req: 'flask_request'):
@@ -101,7 +108,7 @@ def crearRanking(lista):
 def ordenarRanking(ranking):
     key = list(ranking.keys())
     values = list(ranking.values())
-    while len(key)< 3:
+    while len(key) < 3:
         key.append('')
         values.append(0)
     sorted_values_index = np.argsort(values)
@@ -109,8 +116,10 @@ def ordenarRanking(ranking):
     sorted_ranking_keys = [key[i] for i in sorted_values_index]
     sorted_ranking_values = [values[i] for i in sorted_values_index]
     suma = sum(sorted_ranking_values)
-    sorted_ranking_per = [100*values[i]/suma for i in sorted_values_index]
-
+    if suma != 0:
+        sorted_ranking_per = [100 * values[i] / suma for i in sorted_values_index]
+    else:
+        sorted_ranking_per = [0 for i in sorted_values_index]
     return [sorted_ranking_keys, sorted_ranking_values, sorted_ranking_per]
 
 
@@ -119,13 +128,19 @@ def get_stats(username: str):
     cursor = conn.cursor()
     cursor.execute("""SELECT phrase FROM search_log""")
     res = cursor.fetchall()
-    rankingGeneral = crearRanking(res)
+    if res:
+        rankingGeneral = crearRanking(res)
+    else:
+        rankingGeneral = {}
     rankingGeneral_sorted = ordenarRanking(rankingGeneral)
+
 
     cursor.execute("""SELECT phrase FROM search_log WHERE usuario =(?)""", (username,))
     res = cursor.fetchall()
-    rankingPropio = crearRanking(res)
+    if res:
+        rankingPropio = crearRanking(res)
+    else:
+        rankingPropio = {}
     rankingPropio_sorted = ordenarRanking(rankingPropio)
 
-    return rankingGeneral_sorted,rankingPropio_sorted
-
+    return rankingGeneral_sorted, rankingPropio_sorted
