@@ -4,15 +4,25 @@
 
 <h2>{{ the_title }}</h2>
 
-<p>You submitted the following data:</p>
+<p>General Stats:</p>
 <table>
-    <tr><td>Phrase:</td><td>{{ the_phrase }}</td></tr>
-    <tr><td>Letters:</td><td>{{ the_letters }}</td></tr>
+    <TR><TD>Number</TD><TD>Word</TD><TD>Count</TD><TD>Percentage%</TD></TR>
+    <tr><td>1º Word:</td><td>{{Gword1}}</td><td>{{ Gword1count}}</td><td>{{ Gword1per}}</td></tr>
+    <tr><td>2º Word::</td><td>{{ Gword2 }}</td><td>{{ Gword2count}}</td><td>{{ Gword2per}}</td></tr>
+    <tr><td>3º Word::</td><td>{{ Gword3 }}</td><td>{{ Gword3count}}</td><td>{{ Gword3per}}</td></tr>
 </table>
 
-<p>When "{{ the_phrase }}" is search for "{{ the_letters }}",
-    the following results are founded:</p>
-<h3>{{ the_results }}</h3>
+<p>User Stats:</p>
+<p>
+<table>
+    <TR><TD>Number</TD><TD>Word</TD><TD>Count</TD><TD>Percentage</TD></TR>
+    <tr><td>1º Word:</td><td>{{ Uword1}}</td><td>{{ Uword1count}}</td><td>{{ Uword1per}}</td></tr>
+    <tr><td>2º Word::</td><td>{{ Uword2 }}</td><td>{{ Uword2count}}</td><td>{{ Uword2per}}</td></tr>
+    <tr><td>3º Word::</td><td>{{ Uword3 }}</td><td>{{ Uword3count}}</td><td>{{ Uword3per}}</td></tr>
+</table>
+</p>
+
+
 <a href="{{url_for('entry_page')}}"><button>Back</button></a>
 
 {% endblock %}

@@ -4,16 +4,7 @@ import string
 import time
 import random
 import hashlib
-
-
-def check_bd():
-    conn = sqlite3.connect('bd.sqlite')
-    cursor = conn.cursor()
-
-    #cursor.execute("""SELECT * FROM search_log""")
-    cursor.execute("""SELECT * FROM users""")
-    res = cursor.fetchall()
-    return res
+import numpy as np
 
 
 def log_request_bd(sessionname: str, req: 'flask_request', res: str) -> None:
@@ -37,8 +28,10 @@ def readlog_bd():
 def register_bd(req: 'flask_request'):
     conn = sqlite3.connect('bd.sqlite')
     cursor = conn.cursor()
-    cursor.execute("""INSERT INTO users (name, password, dob)
-                VALUES (?, ?, ?)""", (req.form['usuario'], hashlib.md5(req.form['password'].encode()).hexdigest(), str(datetime.today())))
+    cursor.execute("""INSERT INTO users (name, password, dob, count)
+                VALUES (?, ?, ?, ?)""",
+                   (req.form['usuario'], hashlib.md5(req.form['password'].encode()).hexdigest(),
+                    str(datetime.today()), 0))
     conn.commit()
 
 
@@ -53,7 +46,10 @@ def login_bd(req: 'flask_request'):
         token = 'Error'
     elif hashlib.md5(req.form['password'].encode()).hexdigest() == res[0][0]:
         token = token_generator(64)
-        cursor.execute("""UPDATE users set temporalID = (?) WHERE name= (?)""", (token, req.form['usuario']))
+        cursor.execute("""SELECT count FROM users WHERE name=(?)""", (req.form['usuario'],))
+        count = cursor.fetchall()[0][0] + 1
+        cursor.execute("""UPDATE users set temporalID = (?),count=(?) WHERE name= (?)""",
+                       (token, count, req.form['usuario']))
         conn.commit()
     else:
         token = 'Error'
@@ -66,6 +62,8 @@ def check_token(name: str, token: str):
 
     cursor.execute("""SELECT temporalID FROM users WHERE name=(?)""", (name,))
     res = cursor.fetchall()
+    if name == 'Anonymous':
+        return False
     return token == res[0][0]
 
 
@@ -87,3 +85,47 @@ def token_generator(longitud):
         password.append(str(alphabet[index]))
     password = ''.join(password)
     return password
+
+
+def crearRanking(lista):
+    ranking = {}
+    for frase in lista:
+        for palabra in frase[0].split():
+            if palabra in ranking:
+                ranking[palabra] = ranking[palabra] + 1
+            else:
+                ranking[palabra] = 1
+    return ranking
+
+
+def ordenarRanking(ranking):
+    key = list(ranking.keys())
+    values = list(ranking.values())
+    while len(key)< 3:
+        key.append('')
+        values.append(0)
+    sorted_values_index = np.argsort(values)
+    sorted_values_index = sorted_values_index[::-1]
+    sorted_ranking_keys = [key[i] for i in sorted_values_index]
+    sorted_ranking_values = [values[i] for i in sorted_values_index]
+    suma = sum(sorted_ranking_values)
+    sorted_ranking_per = [100*values[i]/suma for i in sorted_values_index]
+
+    return [sorted_ranking_keys, sorted_ranking_values, sorted_ranking_per]
+
+
+def get_stats(username: str):
+    conn = sqlite3.connect('bd.sqlite')
+    cursor = conn.cursor()
+    cursor.execute("""SELECT phrase FROM search_log""")
+    res = cursor.fetchall()
+    rankingGeneral = crearRanking(res)
+    rankingGeneral_sorted = ordenarRanking(rankingGeneral)
+
+    cursor.execute("""SELECT phrase FROM search_log WHERE usuario =(?)""", (username,))
+    res = cursor.fetchall()
+    rankingPropio = crearRanking(res)
+    rankingPropio_sorted = ordenarRanking(rankingPropio)
+
+    return rankingGeneral_sorted,rankingPropio_sorted
+
