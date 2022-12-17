@@ -3,17 +3,16 @@
 {% block body %}
 <h2>{{ the_title }}</h2>
 
-    <form method="post" action="/entry">
+    <form method="post" action="/login">
     <table>
         <p>
-            Use this form to loggin in the webapp:
+            Use this form to register or login in the webapp:
         </p>
         <tr><td>Users:</td><td><input name="usuario" type="TEXT" width="60"></td></tr>
         <tr><td>Password:</td><td><input name="password" type="TEXT" value=""></td></tr>
     </table>
-    <p>When you are ready, click start button:</p>
-    <p><input value="Register" type="SUBMIT"></p>
-    <p><input value="Loggin" type="SUBMIT"></p>
-    <p><input value="Anonymous" type="SUBMIT"></p>
+    <p><input name='action' value="Register" type="SUBMIT"></p>
+    <p><input name='action' value="Login" type="SUBMIT"></p>
+    <p><input name='action' value="Anonymous" type="SUBMIT"></p>
     </form>
 {% endblock %}
